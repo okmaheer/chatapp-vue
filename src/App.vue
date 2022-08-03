@@ -32,7 +32,7 @@
         <div class="message-inner">
 
           <div class="username">{{ message.username }}</div>
-          <div class="content">{{ message.content }}</div>
+          <div class="content">{{ message.msg }}</div>
         </div>
       </div>
     </section>
@@ -57,7 +57,6 @@ export default {
 
    data(){
     return{
-	socket : io("http://localhost:3000"),
       inputMessage:"",
      username:"",
      isLogin:false,
@@ -68,27 +67,30 @@ export default {
 
 methods:{
 	SendMessage(){
-		this.messages.push({
-			username:this.username,
-			message:this.inputMessage});
+		 let socket = io("http://localhost:3000");
+	
+		socket.emit("msg",{username:this.username,
+		msg:this.inputMessage});
+	
 		this.inputMessage = "";
 	},
   joinServer(){
-   
-    this.socket.on("loggedIn",data=>{
+    let socket = io("http://localhost:3000");
+    socket.on("loggedIn",data=>{
         console.log("one");
       this.messages = data.messages;
       this.users = data.users;
-      this.socket.emit('newuser',this.username);
+      socket.emit('newuser',this.username);
      console.log("one");
     });
-	this.socket.on("userOnline",user =>{
+	socket.on("userOnline",user =>{
         this.users.push(user);
       });
-        this.socket.on("userleft",user =>{
+        socket.on("userleft",user =>{
         this.users.splice(this.user.indexof(user),1);
       });
-      this.socket.on("msg",message =>{
+      socket.on("msg",message =>{
+		console.log(message);
         this.messages.push(message);
       });
 
@@ -100,7 +102,10 @@ methods:{
       this.isLogin = true;
 
    
-  }
+  },
+   mounted() {
+
+   }
 },
 
 
