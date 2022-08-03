@@ -1,11 +1,11 @@
 <template>
- <div class="view login" v-if="state.username ===''|| state.username === null">
+ <div class="view login" v-if="!isLogin">
     <form class="login-form" @submit.prevent ="Login">
       <div class="form-inner">
         <h1>Login to Chat</h1>
         <label for="username">Username</label>
         <input 
-         v-model="inputUsername" type="text" 
+         v-model="username" type="text" 
           
           placeholder="Please enter your username..." />
         <input 
@@ -19,23 +19,29 @@
   <div class="view chat" v-else>
     <header>
       <button class="logout">Logout</button>
-      <h1>Welcome, User</h1>
+      <h1>Welcome, {{ username }}</h1>
+        <h5 style="text-align:right;">Online: {{ users.length }}</h5>
     </header>
     
     <section class="chat-box">
-      <div>
+      <div 
+        v-for="message in messages" 
+        :key="message.key" 
+        :class="(message.username == username ? 'message current-user' : 'message')">
+        {{ messages }}
         <div class="message-inner">
-          <div class="username">Maheer</div>
-          <div class="content message current-user">what are you</div>
+
+          <div class="username">{{ message.username }}</div>
+          <div class="content">{{ message.content }}</div>
         </div>
       </div>
     </section>
 
     <footer>
-      <form >
+      <form @submit.prevent="SendMessage">
         <input 
           type="text" 
-        
+          v-model="inputMessage" 
           placeholder="Write a message..." />
         <input 
           type="submit" 
@@ -46,26 +52,60 @@
 </template>
 
 <script>
-import  {reactive , ref, onMount } from 'vue';
+import io from 'socket.io-client';
 export default {
- setup(){
-const  inputUsername = ref("");
-const state = reactive({
-  username: "",
-  messages:[],
-});
-const Login = ()=>{
-   if (inputUsername.value != "" || inputUsername.value != null) {
-    state.username = inputUsername.value;
-    inputUsername.value = "";
-   }
-}
-  return{
-    inputUsername,
-    Login,
-    state
-  };
- }
+
+   data(){
+    return{
+      inputMessage:"",
+     username:"",
+     isLogin:false,
+     socket: io("http://localhost:3000"),
+     messages:[],
+     users:[],
+    };
+   },
+
+methods:{
+  joinServer(){
+    
+    this.socket.on("loggedIn",data=>{
+        console.log("one");
+      this.messages = data.messages;
+      this.users = data.users;
+      this.socket.emit('newuser',this.username);
+     console.log("one");
+    });
+   
+
+ 
+  },
+     listen: function(){
+      this.socket.on("userOnline",user =>{
+        this.users.push(user);
+      });
+        this.socket.on("userleft",user =>{
+        this.users.splice(this.user.indexof(user),1);
+      });
+        this.socket.on("msg",message =>{
+        this.messages.push(message);
+      });
+    },
+  Login(){
+
+      this.joinServer();
+      this.isLogin = true;
+
+   
+  }
+},
+
+
+
+
+//  onMount:()={
+
+//  }
 }
 </script>
 
