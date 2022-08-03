@@ -28,7 +28,7 @@
         v-for="message in messages" 
         :key="message.key" 
         :class="(message.username == username ? 'message current-user' : 'message')">
-        {{ messages }}
+      
         <div class="message-inner">
 
           <div class="username">{{ message.username }}</div>
@@ -57,18 +57,24 @@ export default {
 
    data(){
     return{
+	socket : io("http://localhost:3000"),
       inputMessage:"",
      username:"",
      isLogin:false,
-     socket: io("http://localhost:3000"),
      messages:[],
      users:[],
     };
    },
 
 methods:{
+	SendMessage(){
+		this.messages.push({
+			username:this.username,
+			message:this.inputMessage});
+		this.inputMessage = "";
+	},
   joinServer(){
-    
+   
     this.socket.on("loggedIn",data=>{
         console.log("one");
       this.messages = data.messages;
@@ -76,21 +82,18 @@ methods:{
       this.socket.emit('newuser',this.username);
      console.log("one");
     });
-   
-
- 
-  },
-     listen: function(){
-      this.socket.on("userOnline",user =>{
+	this.socket.on("userOnline",user =>{
         this.users.push(user);
       });
         this.socket.on("userleft",user =>{
         this.users.splice(this.user.indexof(user),1);
       });
-        this.socket.on("msg",message =>{
+      this.socket.on("msg",message =>{
         this.messages.push(message);
       });
-    },
+
+  },
+
   Login(){
 
       this.joinServer();

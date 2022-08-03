@@ -19,11 +19,11 @@ let index = 0;
 
 
 io.on("connection", socket =>{
+  console.log("new connection");
 socket.emit("loggedIn",{
   users: users.map(s => s.username),
   messages:messages
 });
-
 socket.on('newuser', username =>{
   console.log(`${username} has entered the Chat Group`);
   socket.username = username;
