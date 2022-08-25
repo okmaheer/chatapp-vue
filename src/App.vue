@@ -71,7 +71,6 @@ methods:{
 	
 		socket.emit("msg",{username:this.username,
 		msg:this.inputMessage});
-	
 		this.inputMessage = "";
 	},
   joinServer(){
